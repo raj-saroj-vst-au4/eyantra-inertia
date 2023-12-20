@@ -7,5 +7,5 @@
 
 <script setup>
 import { Head } from "@inertiajs/inertia-vue3";
-import Navbar from "../components/Navbar.vue";
+import Navbar from "./../Components/Navbar.vue";
 </script>

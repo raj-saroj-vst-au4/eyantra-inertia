@@ -138,12 +138,12 @@
                 </div>
                 <div className="flex justify-start flex-col items-start">
                     <p className="cursor-pointer text-sm leading-5 text-white">
-                        {{ user.name }}
+                        {{ $page.props.auth.name }}
                     </p>
                     <p
                         className="cursor-pointer text-xs leading-3 text-gray-300"
                     >
-                        {{ user.email }}
+                        {{ $page.props.auth.email }}
                     </p>
                 </div>
             </div>
@@ -181,7 +181,6 @@
     </div>
 </template>
 <script setup>
-const { user } = defineProps(["user"]);
 const logout = () => {
     window.location.href = "/logout";
 }
