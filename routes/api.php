@@ -20,5 +20,6 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
-Route::get('/countries', [CountryController::class, 'index']);
-Route::get('/colleges/{country_id}', [CollegeController::class, 'getCollegesByCountry']);
+Route::get('/countries', [CollegeController::class, 'getCountries']);
+Route::get('/states/{country}', [CollegeController::class, 'getStatesByCountry']);
+Route::get('/colleges/{country}/{state}', [CollegeController::class, 'getCollegesByState']);

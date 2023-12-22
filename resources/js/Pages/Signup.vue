@@ -46,17 +46,55 @@
                                 <option
                                     v-for="country in countries"
                                     :key="country.id"
-                                    :value="country.country_name"
+                                    :value="country"
                                 >
-                                    {{ country.country_name }}
+                                    {{ country }}
                                 </option>
                             </select>
+                            <select
+                                v-model="selectedCollegeState"
+                                @change="onStateSelected"
+                                class="bg-gray-50 border border-gray-400 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
+                            >
+                                <option :value="null" selected>
+                                    College State
+                                </option>
+                                <option
+                                    v-if="selectedCountry"
+                                    v-for="collegestate in collegestates"
+                                    :key="collegestate.id"
+                                    :value="collegestate"
+                                >
+                                    {{ collegestate }}
+                                </option>
+                            </select>
+                        </div>
+                        <div class="mt-5">
+                            <select
+                                v-model="selectedCollege"
+                                class="bg-gray-50 border border-gray-400 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
+                            >
+                                <option :value="null" selected>
+                                    Your College
+                                </option>
+                                <option
+                                    v-if="selectedCollegeState"
+                                    v-for="college in colleges"
+                                    :key="college.id"
+                                    :value="college.clg_code"
+                                >
+                                    {{ college.college_name }}
+                                </option>
+                            </select>
+                        </div>
+                        <!-- done till here -->
+                        <div class="mt-5">
                             <select
                                 v-model="selectedDepartment"
                                 class="bg-gray-50 border border-gray-400 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
                             >
                                 <option :value="null" selected>
-                                    Choose Your Department
+                                    Your Department
                                 </option>
                                 <option
                                     v-for="department in departments"
@@ -68,31 +106,9 @@
                             </select>
                         </div>
                         <div class="mt-5">
-                            <select
-                                v-model="selectedCollege"
-                                class="bg-gray-50 border border-gray-400 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
-                            >
-                                <option :value="null" selected>
-                                    Choose Registration Type
-                                </option>
-                                <option
-                                    v-if="selectedCountry"
-                                    v-for="college in colleges"
-                                    :key="college.id"
-                                    :value="college.clg_code"
-                                >
-                                    {{
-                                        college.college_name +
-                                        ", " +
-                                        college.city
-                                    }}
-                                </option>
-                            </select>
-                        </div>
-                        <div class="mt-5">
                             <input
                                 type="text"
-                                placeholder="College Address"
+                                placeholder="Your Address"
                                 class="border border-gray-400 py-1 px-2 w-full"
                             />
                         </div>
@@ -137,18 +153,41 @@ import { Head } from "@inertiajs/inertia-vue3";
 import { ref, onMounted } from "vue";
 
 const countries = ref([]);
+const collegestates = ref([]);
 const colleges = ref([]);
 const departments = ref([]);
 const selectedCountry = ref(null);
+const selectedCollegeState = ref(null);
 const selectedCollege = ref(null);
 const selectedDepartment = ref(null);
 
 const fetchCountries = async () => {
     try {
         const response = await fetch("/api/countries");
-        countries.value = await response.json();
+        const countriesjson = await response.json();
+        countries.value = countriesjson.countries;
     } catch (error) {
         console.error("Error fetching countries:", error);
+    }
+};
+
+const fetchStates = async (country) => {
+    try {
+        const response = await fetch(`/api/states/${country}`);
+        const statesjson = await response.json();
+        collegestates.value = statesjson.states;
+    } catch (error) {
+        console.error("Error fetching states:", error);
+    }
+};
+
+const fetchColleges = async (country, state) => {
+    try {
+        const res = await fetch(`/api/colleges/${country}/${state}`);
+        const clg = await res.json();
+        colleges.value = clg.colleges;
+    } catch (err) {
+        console.log("error fetching colleges:", err);
     }
 };
 
@@ -161,17 +200,6 @@ const fetchDepartments = async () => {
     }
 };
 
-const fetchColleges = async (country) => {
-    console.log("incoming country", country);
-    try {
-        const res = await fetch(`/api/colleges/${country}`);
-        const clg = await res.json();
-        colleges.value = clg.colleges;
-    } catch (err) {
-        console.log("error fetching colleges:", err);
-    }
-};
-
 onMounted(() => {
     fetchCountries();
     fetchDepartments();
@@ -180,7 +208,15 @@ onMounted(() => {
 const onCountrySelected = () => {
     if (selectedCountry.value) {
         const country = selectedCountry.value;
-        fetchColleges(country);
+        fetchStates(country);
+    }
+};
+
+const onStateSelected = () => {
+    if (selectedCollegeState.value) {
+        const state = selectedCollegeState.value;
+        const country = selectedCountry.value;
+        fetchColleges(country, state);
     }
 };
 </script>
