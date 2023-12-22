@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\CollegeController;
 use App\Http\Controllers\CountryController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -20,4 +21,4 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 });
 
 Route::get('/countries', [CountryController::class, 'index']);
-
+Route::get('/colleges/{country_id}', [CollegeController::class, 'getCollegesByCountry']);

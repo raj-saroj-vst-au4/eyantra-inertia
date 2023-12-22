@@ -37,6 +37,7 @@
                         <div class="grid grid-cols-2 gap-5">
                             <select
                                 v-model="selectedCountry"
+                                @change="onCountrySelected"
                                 class="bg-gray-50 border border-gray-400 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
                             >
                                 <option :value="null" selected>
@@ -45,29 +46,48 @@
                                 <option
                                     v-for="country in countries"
                                     :key="country.id"
-                                    :value="country.country_code"
+                                    :value="country.country_name"
                                 >
                                     {{ country.country_name }}
                                 </option>
                             </select>
                             <select
-                                id="countryrefg"
+                                v-model="selectedDepartment"
                                 class="bg-gray-50 border border-gray-400 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
                             >
-                                <option selected>
-                                    Choose Registration Type
+                                <option :value="null" selected>
+                                    Choose Your Department
                                 </option>
-                                <option value="TC">Teacher</option>
-                                <option value="CO">Coodinator</option>
-                                <option value="AD">Admin</option>
+                                <option
+                                    v-for="department in departments"
+                                    :key="department.id"
+                                    :value="department.dept_code"
+                                >
+                                    {{ department.name }}
+                                </option>
                             </select>
                         </div>
                         <div class="mt-5">
-                            <input
-                                type="text"
-                                placeholder="College Name"
-                                class="border border-gray-400 py-1 px-2 w-full"
-                            />
+                            <select
+                                v-model="selectedCollege"
+                                class="bg-gray-50 border border-gray-400 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
+                            >
+                                <option :value="null" selected>
+                                    Choose Registration Type
+                                </option>
+                                <option
+                                    v-if="selectedCountry"
+                                    v-for="college in colleges"
+                                    :key="college.id"
+                                    :value="college.clg_code"
+                                >
+                                    {{
+                                        college.college_name +
+                                        ", " +
+                                        college.city
+                                    }}
+                                </option>
+                            </select>
                         </div>
                         <div class="mt-5">
                             <input
@@ -118,7 +138,10 @@ import { ref, onMounted } from "vue";
 
 const countries = ref([]);
 const colleges = ref([]);
+const departments = ref([]);
 const selectedCountry = ref(null);
+const selectedCollege = ref(null);
+const selectedDepartment = ref(null);
 
 const fetchCountries = async () => {
     try {
@@ -129,10 +152,21 @@ const fetchCountries = async () => {
     }
 };
 
-const fetchColleges = async (country_code) => {
+const fetchDepartments = async () => {
     try {
-        const res = await fetch(`/api/colleges/${country_code}`);
-        colleges.value = await res.json();
+        const response = await fetch("/api/departments");
+        departments.value = await response.json();
+    } catch (error) {
+        console.error("Error fetching departments:", error);
+    }
+};
+
+const fetchColleges = async (country) => {
+    console.log("incoming country", country);
+    try {
+        const res = await fetch(`/api/colleges/${country}`);
+        const clg = await res.json();
+        colleges.value = clg.colleges;
     } catch (err) {
         console.log("error fetching colleges:", err);
     }
@@ -140,5 +174,13 @@ const fetchColleges = async (country_code) => {
 
 onMounted(() => {
     fetchCountries();
+    fetchDepartments();
 });
+
+const onCountrySelected = () => {
+    if (selectedCountry.value) {
+        const country = selectedCountry.value;
+        fetchColleges(country);
+    }
+};
 </script>
