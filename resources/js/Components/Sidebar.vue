@@ -27,15 +27,15 @@
         <div className="h-full px-3 py-4 overflow-y-auto bg-gray-800">
             <a
                 href="https://e-yantra.org/"
-                className="flex items-center ps-2.5 mb-5"
+                className="flex justify-center ps-2.5 mb-5"
             >
                 <img
                     src="https://portal.e-yantra.org/img/e-logo-small.svg"
-                    className="h-6 me-3 sm:h-7"
+                    className="h-6 me-3"
                     alt="E-yantra"
                 />
                 <span
-                    className="self-center text-xl font-semibold whitespace-nowrap text-white"
+                    className="item-center ml-4 text-xl font-semibold whitespace-nowrap text-white"
                 >
                     E-yantra
                 </span>

@@ -30,24 +30,28 @@
                         <div class="my-5">
                             <input
                                 type="text"
-                                placeholder="Your Fullname"
+                                placeholder="Your Full Name"
                                 class="border border-gray-400 py-1 px-2 w-full"
                             />
                         </div>
                         <div class="grid grid-cols-2 gap-5">
                             <select
-                                id="category"
+                                v-model="selectedCountry"
                                 class="bg-gray-50 border border-gray-400 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
                             >
-                                <option selected>
-                                    Choose Registration Type
+                                <option :value="null" selected>
+                                    Select Country
                                 </option>
-                                <option value="TC">Teacher</option>
-                                <option value="CO">Coodinator</option>
-                                <option value="AD">Admin</option>
+                                <option
+                                    v-for="country in countries"
+                                    :key="country.id"
+                                    :value="country.country_code"
+                                >
+                                    {{ country.country_name }}
+                                </option>
                             </select>
                             <select
-                                id="category"
+                                id="countryrefg"
                                 class="bg-gray-50 border border-gray-400 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
                             >
                                 <option selected>
@@ -107,6 +111,34 @@
         </div>
     </div>
 </template>
+
 <script setup>
 import { Head } from "@inertiajs/inertia-vue3";
+import { ref, onMounted } from "vue";
+
+const countries = ref([]);
+const colleges = ref([]);
+const selectedCountry = ref(null);
+
+const fetchCountries = async () => {
+    try {
+        const response = await fetch("/api/countries");
+        countries.value = await response.json();
+    } catch (error) {
+        console.error("Error fetching countries:", error);
+    }
+};
+
+const fetchColleges = async (country_code) => {
+    try {
+        const res = await fetch(`/api/colleges/${country_code}`);
+        colleges.value = await res.json();
+    } catch (err) {
+        console.log("error fetching colleges:", err);
+    }
+};
+
+onMounted(() => {
+    fetchCountries();
+});
 </script>

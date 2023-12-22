@@ -1,6 +1,6 @@
 <?php
 
-use App\Http\Controllers\InertiaUserController;
+use App\Http\Controllers\InertiaRouteController;
 use Illuminate\Support\Facades\Route;
 /*
 |--------------------------------------------------------------------------
@@ -13,8 +13,8 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('/', [InertiaUserController::class, 'home'])->name('home');
+Route::get('/', [InertiaRouteController::class, 'home'])->name('home');
 
 Route::middleware(['isAuth'])->group(function () {
-    Route::get('/signup', [InertiaUserController::class, 'signup'])->name('signup');
+    Route::get('/signup', [InertiaRouteController::class, 'signup'])->name('signup');
 });
