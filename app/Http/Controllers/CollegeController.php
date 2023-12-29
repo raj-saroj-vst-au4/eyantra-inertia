@@ -36,4 +36,12 @@ class CollegeController extends Controller
 
         return response()->json(['colleges' => $colleges]);
     }
+    public function getDepartments()
+    {
+        // Specify the database connection for the College model
+        $colleges = CollegeModel::on('college_database')
+            ->get();
+
+        return response()->json(['colleges' => $colleges]);
+    }
 }

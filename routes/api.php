@@ -2,6 +2,8 @@
 
 use App\Http\Controllers\CollegeController;
 use App\Http\Controllers\CountryController;
+use App\Http\Controllers\DepartmentController;
+use App\Http\Controllers\SignupFormController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -23,3 +25,7 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 Route::get('/countries', [CollegeController::class, 'getCountries']);
 Route::get('/states/{country}', [CollegeController::class, 'getStatesByCountry']);
 Route::get('/colleges/{country}/{state}', [CollegeController::class, 'getCollegesByState']);
+Route::get('/departments', [DepartmentController::class, 'getDepartments']);
+Route::get('/designations', [DepartmentController::class, 'getDesignations']);
+
+Route::post('/regcomplete', [SignupFormController::class, 'store']);

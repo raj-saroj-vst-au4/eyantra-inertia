@@ -26,11 +26,12 @@
                 <div class="w-full lg:w-1/2 py-16 px-12">
                     <h2 class="text-3xl mb-4">Finish signup</h2>
                     <p class="mb-4">Lets wrap-up registration</p>
-                    <form action="#">
+                    <form @submit.prevent="submitForm">
                         <div class="my-5">
                             <input
                                 type="text"
                                 placeholder="Your Full Name"
+                                v-model="userFname"
                                 class="border border-gray-400 py-1 px-2 w-full"
                             />
                         </div>
@@ -81,14 +82,29 @@
                                     v-if="selectedCollegeState"
                                     v-for="college in colleges"
                                     :key="college.id"
-                                    :value="college.clg_code"
+                                    :value="college.college_name"
                                 >
                                     {{ college.college_name }}
                                 </option>
                             </select>
                         </div>
                         <!-- done till here -->
-                        <div class="mt-5">
+                        <div class="mt-5 grid grid-cols-2 gap-5">
+                            <select
+                                v-model="selectedDesignation"
+                                class="bg-gray-50 border border-gray-400 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
+                            >
+                                <option :value="null" selected>
+                                    Your Designation
+                                </option>
+                                <option
+                                    v-for="designation in designations"
+                                    :key="designation.name"
+                                    :value="designation.name"
+                                >
+                                    {{ designation.name }}
+                                </option>
+                            </select>
                             <select
                                 v-model="selectedDepartment"
                                 class="bg-gray-50 border border-gray-400 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
@@ -99,7 +115,7 @@
                                 <option
                                     v-for="department in departments"
                                     :key="department.id"
-                                    :value="department.dept_code"
+                                    :value="department.name"
                                 >
                                     {{ department.name }}
                                 </option>
@@ -109,20 +125,7 @@
                             <input
                                 type="text"
                                 placeholder="Your Address"
-                                class="border border-gray-400 py-1 px-2 w-full"
-                            />
-                        </div>
-                        <div class="mt-5">
-                            <input
-                                type="text"
-                                placeholder="City"
-                                class="border border-gray-400 py-1 px-2 w-full"
-                            />
-                        </div>
-                        <div class="mt-5">
-                            <input
-                                type="text"
-                                placeholder="State"
+                                v-model="userAddress"
                                 class="border border-gray-400 py-1 px-2 w-full"
                             />
                         </div>
@@ -130,6 +133,7 @@
                             <input
                                 type="number"
                                 placeholder="pincode"
+                                v-model="userPincode"
                                 class="border border-gray-400 py-1 px-2 w-full"
                             />
                         </div>
@@ -137,9 +141,18 @@
                         <div class="mt-5">
                             <button
                                 class="w-full bg-blue-500 py-3 text-center text-white"
+                                type="submit"
                             >
                                 Continue
                             </button>
+                        </div>
+                        <div
+                            v-if="validationError"
+                            class="text-red-500 absolute z-20"
+                        >
+                            <div class="relative mt-3">
+                                {{ validationError }}
+                            </div>
                         </div>
                     </form>
                 </div>
@@ -156,10 +169,17 @@ const countries = ref([]);
 const collegestates = ref([]);
 const colleges = ref([]);
 const departments = ref([]);
+const designations = ref([]);
+
+const validationError = ref(null);
 const selectedCountry = ref(null);
 const selectedCollegeState = ref(null);
 const selectedCollege = ref(null);
 const selectedDepartment = ref(null);
+const selectedDesignation = ref(null);
+const userFname = ref(null);
+const userAddress = ref(null);
+const userPincode = ref(null);
 
 const fetchCountries = async () => {
     try {
@@ -193,16 +213,26 @@ const fetchColleges = async (country, state) => {
 
 const fetchDepartments = async () => {
     try {
-        const response = await fetch("/api/departments");
-        departments.value = await response.json();
+        const depresponse = await fetch("/api/departments");
+        departments.value = await depresponse.json();
     } catch (error) {
         console.error("Error fetching departments:", error);
+    }
+};
+
+const fetchDesignations = async () => {
+    try {
+        const desresponse = await fetch("/api/designations");
+        designations.value = await desresponse.json();
+    } catch (error) {
+        console.error("Error fetching designations:", error);
     }
 };
 
 onMounted(() => {
     fetchCountries();
     fetchDepartments();
+    fetchDesignations();
 });
 
 const onCountrySelected = () => {
@@ -217,6 +247,45 @@ const onStateSelected = () => {
         const state = selectedCollegeState.value;
         const country = selectedCountry.value;
         fetchColleges(country, state);
+    }
+};
+
+const submitForm = async () => {
+    try {
+        const response = await fetch("/api/regcomplete", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                name: userFname.value,
+                country: selectedCountry.value,
+                state: selectedCollegeState.value,
+                college: selectedCollege.value,
+                department: selectedDepartment.value,
+                designation: selectedDesignation.value,
+                address: userAddress.value,
+                pin: userPincode.value,
+            }),
+        });
+
+        if (!response.ok) {
+            console.log("Backend down");
+        }
+        const data = await response.json();
+        console.log(data);
+        if (data.status == 200) {
+            console.log("form submitted");
+            validationError.value = null;
+        } else if (data.status == 401) {
+            console.log(data);
+        } else {
+            validationError.value = Object.values(data.errors)[0][0];
+            console.log("Return data ", Object.values(data.errors)[0][0]);
+        }
+    } catch (error) {
+        console.error(error);
+        // Handle error, e.g., show an error message
     }
 };
 </script>
